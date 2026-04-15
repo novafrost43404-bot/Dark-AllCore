@@ -5,7 +5,7 @@ export const botConfig = {
   // =========================
   // BOT PREFIX
   // =========================
-  prefix: "/",
+  prefix: "?",
 
   // =========================
   // BOT PRESENCE (what users see under the bot name)
@@ -30,9 +30,9 @@ export const botConfig = {
     activities: [
       {
         // Text users will see (example: "Playing /help | Titan Bot").
-        name: "Made with ❤️",
+        name: "Dark AllCore | Moderation & Utilities",
         // Activity type number (0 = Playing).
-        type: 0, 
+        type: 3, 
       },
     ],
   },
@@ -61,10 +61,17 @@ export const botConfig = {
   applications: {
     // Default questions shown when someone fills out an application.
     defaultQuestions: [
-      { question: "What is your name?", required: true },
-      { question: "How old are you?", required: true },
-      { question: "Why do you want to join?", required: true },
-    ],
+  { question: "What is your Rec Room and Discord username?", required: true },
+  { question: "How old are you?", required: true },
+  { question: "What timezone are you in?", required: true },
+  { question: "Do you have any previous staff experience? If yes, explain.", required: true },
+  { question: "Why do you want to become a staff member?", required: true },
+  { question: "What makes you different from other applicants?", required: true },
+  { question: "How would you handle a rule-breaker in the server?", required: true },
+  { question: "What would you do if two members were arguing in chat?", required: true },
+  { question: "Are you active enough to support the server daily?", required: true },
+  { question: "Anything else you want us to know about you?", required: false }
+],
 
     // Embed colors by application status.
     statusColors: {
@@ -93,14 +100,14 @@ export const botConfig = {
   embeds: {
     colors: {
       // Main brand colors.
-      primary: "#336699", 
-      secondary: "#2F3136", 
+      primary: "#000000", 
+      secondary: "#FFFFFF", 
 
       // Standard status colors for success/error/warning/info messages.
-      success: "#57F287", 
-      error: "#ED4245", 
-      warning: "#FEE75C", 
-      info: "#3498DB", 
+      success: "#00C853", 
+      error: "#DC2626", 
+      warning: "#F39C12", 
+      info: "#2980B9", 
 
       // Neutral utility colors.
       light: "#FFFFFF",
@@ -297,7 +304,7 @@ export const botConfig = {
     defaultMessage: "Click the button below to verify yourself and gain access to the server!",
 
     // Text on the verification button.
-    defaultButtonText: "Verify",
+    defaultButtonText: "Verify here",
 
     // Automatic verification behavior.
     autoVerify: {
