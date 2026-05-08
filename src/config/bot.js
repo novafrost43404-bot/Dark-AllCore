@@ -25,9 +25,9 @@ export const botConfig = {
     activities: [
       {
         // Text users will see (example: "Playing /help | Titan Bot").
-        name: "Made By dark_00.005",
+        name: "/help To Look At All Commands | Apex Bot",
         // Activity type number (0 = Playing).
-        type: 3 /Help | Apex Bot, 
+        type: 3, 
       },
     ],
   },
