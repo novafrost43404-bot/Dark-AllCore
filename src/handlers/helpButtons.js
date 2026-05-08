@@ -1,10 +1,19 @@
 import { createEmbed } from '../utils/embeds.js';
-import { createButton, createSelectMenu, getPaginationRow } from '../utils/components.js';
+import { createSelectMenu } from '../utils/components.js';
 import { createAllCommandsMenu } from './helpSelectMenus.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Collection, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    MessageFlags,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+} from 'discord.js';
+
 import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,14 +24,17 @@ const BACK_BUTTON_ID = "help-back-to-main";
 const CATEGORY_SELECT_ID = "help-category-select";
 const ALL_COMMANDS_ID = "help-all-commands";
 const PAGINATION_PREFIX = "help-page";
+
 const BUG_REPORT_BUTTON_ID = "help-bug-report";
+const BUG_MODAL_ID = "bug-report-modal";
+const BUG_INPUT_ID = "bug-report-input";
 
 const CATEGORY_ICONS = {
-    Core: "ℹ️",
+    Core: "⚡",
     Moderation: "🛡️",
     Economy: "💰",
     Fun: "🎮",
-    Leveling: "📊",
+    Leveling: "📈",
     Utility: "🔧",
     Ticket: "🎫",
     Welcome: "👋",
@@ -31,13 +43,15 @@ const CATEGORY_ICONS = {
     Tools: "🛠️",
     Search: "🔍",
     Reaction_Roles: "🎭",
-    Community: "👥",
+    Community: "🌍",
     Birthday: "🎂",
     Config: "⚙️",
 };
 
 async function createCategorySelectMenu() {
+
     const commandsPath = path.join(__dirname, "../commands");
+
     const categoryDirs = (
         await fs.readdir(commandsPath, { withFileTypes: true })
     )
@@ -47,108 +61,112 @@ async function createCategorySelectMenu() {
 
     const options = [
         {
-            label: "📋 All Commands",
-            description: "View all available commands with pagination",
+            label: "📜 All Commands",
+            description: "View every command available",
             value: ALL_COMMANDS_ID,
         },
+
         ...categoryDirs.map((category) => {
+
             const categoryName =
                 category.charAt(0).toUpperCase() +
                 category.slice(1).toLowerCase();
-            const icon = CATEGORY_ICONS[categoryName] || "🔍";
+
+            const icon = CATEGORY_ICONS[categoryName] || "✨";
+
             return {
                 label: `${icon} ${categoryName}`,
-                description: `View commands in the ${categoryName} category`,
+                description: `View ${categoryName} commands`,
                 value: category,
             };
         }),
     ];
 
     const embed = createEmbed({
-        title: "🤖 TitanBot Help Center",
-        description: "Your all-in-one Discord companion for moderation, economy, fun, and server management.\n\nSelect a category below to explore our powerful commands:",
-        color: 'primary'
+        title: "🤖 Apex Bot Help Center",
+        description:
+            "Advanced Discord utility bot packed with moderation, economy, fun, automation, and server management systems.\n\n" +
+            "Use the dropdown below to explore all command categories.",
+        color: "primary",
     });
 
     embed.addFields(
         {
-            name: "🛡️ **Moderation**",
-            value: "Server moderation, user management, and enforcement tools",
-            inline: true
+            name: "🛡️ Moderation",
+            value: "Ban, kick, timeout, warnings, automod",
+            inline: true,
         },
         {
-            name: "💰 **Economy**",
-            value: "Currency system, shops, and virtual economy",
-            inline: true
+            name: "💰 Economy",
+            value: "Coins, work, daily rewards, shop system",
+            inline: true,
         },
         {
-            name: "🎮 **Fun**",
-            value: "Games, entertainment, and interactive commands",
-            inline: true
+            name: "🎮 Fun",
+            value: "Games, memes, entertainment commands",
+            inline: true,
         },
         {
-            name: "📊 **Leveling**",
-            value: "User levels, XP system, and progression tracking",
-            inline: true
+            name: "📈 Leveling",
+            value: "XP system, ranks, progression",
+            inline: true,
         },
         {
-            name: "🎫 **Tickets**",
-            value: "Support ticket system for server management",
-            inline: true
+            name: "🎫 Tickets",
+            value: "Professional support ticket system",
+            inline: true,
         },
         {
-            name: "🎉 **Giveaways**",
-            value: "Automated giveaway management and distribution",
-            inline: true
+            name: "🎉 Giveaways",
+            value: "Fast giveaway management tools",
+            inline: true,
         },
         {
-            name: "👋 **Welcome**",
-            value: "Member welcome messages and onboarding",
-            inline: true
+            name: "🔧 Utility",
+            value: "Helpful server management tools",
+            inline: true,
         },
         {
-            name: "🎂 **Birthdays**",
-            value: "Birthday tracking and celebration features",
-            inline: true
+            name: "🌍 Community",
+            value: "Reaction roles, counters, engagement",
+            inline: true,
         },
         {
-            name: "🔧 **Utilities**",
-            value: "Useful tools and server utilities",
-            inline: true
+            name: "⚙️ Config",
+            value: "Customize your server systems",
+            inline: true,
         }
     );
 
+    embed.setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png");
+
     embed.setFooter({
-        text: "Made with ❤️"
+        text: "Apex Bot • Made by dark_00.005",
     });
+
     embed.setTimestamp();
 
     const bugReportButton = new ButtonBuilder()
         .setCustomId(BUG_REPORT_BUTTON_ID)
         .setLabel("Report Bug")
+        .setEmoji("🐛")
         .setStyle(ButtonStyle.Danger);
 
-    const supportButton = new ButtonBuilder()
-        .setLabel("Support Server")
-        .setURL("https://discord.gg/QnWNz2dKCE")
-        .setStyle(ButtonStyle.Link);
-
-    const touchpointButton = new ButtonBuilder()
-        .setLabel("Learn from Touchpoint")
-        .setURL("https://www.youtube.com/@TouchDisc")
-        .setStyle(ButtonStyle.Link);
-
-    const selectRow = createSelectMenu(
-        CATEGORY_SELECT_ID,
-        "Select to view the commands",
-        options,
-    );
+    const inviteButton = new ButtonBuilder()
+        .setLabel("Invite Bot")
+        .setStyle(ButtonStyle.Link)
+        .setURL("https://discord.com/oauth2/authorize?client_id=1501284170251632832&permissions=8&integration_type=0&scope=bot+applications.commands");
 
     const buttonRow = new ActionRowBuilder().addComponents([
         bugReportButton,
-        supportButton,
-        touchpointButton,
+        inviteButton,
     ]);
+
+    const selectRow = createSelectMenu(
+        CATEGORY_SELECT_ID,
+        "Select a category",
+        options,
+    );
 
     return {
         embeds: [embed],
@@ -158,64 +176,94 @@ async function createCategorySelectMenu() {
 
 export const helpBackButton = {
     name: BACK_BUTTON_ID,
-    async execute(interaction, client) {
+
+    async execute(interaction) {
+
         try {
+
             if (!interaction.deferred && !interaction.replied) {
                 await interaction.deferUpdate();
             }
 
-            const { embeds, components } = await createCategorySelectMenu();
+            const { embeds, components } =
+                await createCategorySelectMenu();
+
             await interaction.editReply({
                 embeds,
                 components,
             });
-        } catch (error) {
-            if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help back button interaction already acknowledged or expired.', {
-                    event: 'interaction.help.button.unavailable',
-                    errorCode: String(error.code),
-                    customId: interaction.customId,
-                    interactionId: interaction.id,
-                });
-                return;
-            }
 
-            throw error;
+        } catch (error) {
+
+            logger.error(error);
         }
     },
 };
 
 export const helpBugReportButton = {
     name: BUG_REPORT_BUTTON_ID,
+
+    async execute(interaction) {
+
+        const modal = new ModalBuilder()
+            .setCustomId(BUG_MODAL_ID)
+            .setTitle("Bug Report");
+
+        const bugInput = new TextInputBuilder()
+            .setCustomId(BUG_INPUT_ID)
+            .setLabel("Describe the bug")
+            .setPlaceholder("Explain the issue in detail...")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true)
+            .setMaxLength(1000);
+
+        const row = new ActionRowBuilder().addComponents(bugInput);
+
+        modal.addComponents(row);
+
+        await interaction.showModal(modal);
+    },
+};
+
+export const helpBugModal = {
+    name: BUG_MODAL_ID,
+
     async execute(interaction, client) {
-        const githubButton = new ButtonBuilder()
-            .setLabel('🐛 Report Bug on GitHub')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://github.com/codebymitch/TitanBot/issues');
 
-        const bugRow = new ActionRowBuilder().addComponents(githubButton);
+        const report =
+            interaction.fields.getTextInputValue(BUG_INPUT_ID);
 
-        const bugReportEmbed = createEmbed({
-            title: '🐛 Bug Report',
-            description: 'Found a bug? Please report it on our GitHub Issues page!\n\n' +
-                '**When reporting a bug, please include:**\n' +
-                '• 📝 Detailed description of the issue\n' +
-                '• 📋 Steps to reproduce the problem\n' +
-                '• 📸 Screenshots if applicable\n' +
-                '• 💻 Your bot version and environment\n\n' +
-                'This helps us fix issues faster and more effectively!',
-            color: 'error'
+        const owner = await client.users.fetch("1280516604148453387");
+
+        const reportEmbed = createEmbed({
+            title: "🐛 New Bug Report",
+            description: report,
+            color: "error",
         });
-        bugReportEmbed.setFooter({
-            text: 'TitanBot Bug Reporting System',
-            iconURL: client.user.displayAvatarURL()
+
+        reportEmbed.addFields(
+            {
+                name: "👤 User",
+                value: `${interaction.user.tag}`,
+                inline: true,
+            },
+            {
+                name: "🏠 Server",
+                value: `${interaction.guild?.name || "DM"}`,
+                inline: true,
+            }
+        );
+
+        reportEmbed.setTimestamp();
+
+        await owner.send({
+            embeds: [reportEmbed],
         });
-        bugReportEmbed.setTimestamp();
 
         await interaction.reply({
-            embeds: [bugReportEmbed],
-            components: [bugRow],
-            flags: MessageFlags.Ephemeral
+            content:
+                "✅ Your bug report has been sent to the developer.",
+            flags: MessageFlags.Ephemeral,
         });
     },
 };
@@ -223,18 +271,30 @@ export const helpBugReportButton = {
 export const helpReportCommand = {
     name: COMMAND_LIST_ID,
     categoryName: null,
+
     async execute(interaction, client) {
-        
-    }
+
+    },
 };
 
 function getPaginationInfo(components) {
+
     for (const row of components || []) {
+
         for (const component of row.components || []) {
-            if (component.customId === `${PAGINATION_PREFIX}_page`) {
-                const label = component.label || '';
-                const match = label.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
+
+            if (
+                component.customId ===
+                `${PAGINATION_PREFIX}_page`
+            ) {
+
+                const label = component.label || "";
+
+                const match =
+                    label.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
+
                 if (match) {
+
                     return {
                         currentPage: Number(match[1]),
                         totalPages: Number(match[2]),
@@ -244,54 +304,73 @@ function getPaginationInfo(components) {
         }
     }
 
-    return { currentPage: 1, totalPages: 1 };
+    return {
+        currentPage: 1,
+        totalPages: 1,
+    };
 }
 
 export const helpPaginationButton = {
     name: `${PAGINATION_PREFIX}_next`,
+
     async execute(interaction, client) {
+
         try {
+
             if (!interaction.deferred && !interaction.replied) {
                 await interaction.deferUpdate();
             }
 
-            const { currentPage, totalPages } = getPaginationInfo(interaction.message?.components);
+            const { currentPage, totalPages } =
+                getPaginationInfo(
+                    interaction.message?.components
+                );
 
             let nextPage = currentPage;
+
             switch (interaction.customId) {
+
                 case `${PAGINATION_PREFIX}_first`:
                     nextPage = 1;
                     break;
+
                 case `${PAGINATION_PREFIX}_prev`:
-                    nextPage = Math.max(1, currentPage - 1);
+                    nextPage = Math.max(
+                        1,
+                        currentPage - 1
+                    );
                     break;
+
                 case `${PAGINATION_PREFIX}_next`:
-                    nextPage = Math.min(totalPages, currentPage + 1);
+                    nextPage = Math.min(
+                        totalPages,
+                        currentPage + 1
+                    );
                     break;
+
                 case `${PAGINATION_PREFIX}_last`:
                     nextPage = totalPages;
                     break;
+
                 default:
                     nextPage = currentPage;
                     break;
             }
 
-            const { embeds, components } = await createAllCommandsMenu(nextPage, client);
-            await interaction.editReply({ embeds, components });
-        } catch (error) {
-            if (error?.code === 40060 || error?.code === 10062) {
-                logger.warn('Help pagination interaction already acknowledged or expired.', {
-                    event: 'interaction.help.pagination.unavailable',
-                    errorCode: String(error.code),
-                    customId: interaction.customId,
-                    interactionId: interaction.id,
-                });
-                return;
-            }
+            const { embeds, components } =
+                await createAllCommandsMenu(
+                    nextPage,
+                    client
+                );
 
-            throw error;
+            await interaction.editReply({
+                embeds,
+                components,
+            });
+
+        } catch (error) {
+
+            logger.error(error);
         }
     },
 };
-
-
